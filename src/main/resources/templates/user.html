@@ -30,8 +30,9 @@
         <td>
             <a th:href="@{/users/edit/{id}(id=${user.id})}">Edit</a>
             |
-            <a th:href="@{/users/delete/{id}(id=${user.id})}"
-               onclick="return confirm('Delete this user?')">Delete</a>
+            <form th:action="@{/users/delete/{id}(id=${user.id})}" method="post" style="display:inline;">
+                <button type="submit" onclick="return confirm('Delete?')">Delete</button>
+            </form>
         </td>
     </tr>
     </tbody>

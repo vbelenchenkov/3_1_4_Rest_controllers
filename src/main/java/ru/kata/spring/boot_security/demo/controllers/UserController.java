@@ -12,7 +12,6 @@ import ru.kata.spring.boot_security.demo.repository.UserRepository;
 public class UserController {
     private final UserRepository userRepository;
 
-    @Autowired
     public UserController (UserRepository userRepository) {
         this.userRepository = userRepository;
     }
@@ -20,6 +19,7 @@ public class UserController {
     // Показать всех пользователей
     @GetMapping
     public String getAllUsers(Model model) {
+        System.out.println("Controller has beeen called.");
         model.addAttribute("users", userRepository.findAll());
         return "user";
     }
