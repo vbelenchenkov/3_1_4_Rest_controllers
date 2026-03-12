@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+</head>
+<body>
+<h1>User Profile</h1>
+<p>Name: <span th:text="${user.name}">Name</span></p>
+<p>Email: <span th:text="${user.email}">Email</span></p>
+<p>Age: <span th:text="${user.age}">Age</span></p>
+<p>Roles:
+    <span th:each="role, iterStat : ${user.roles}">
+        <span th:text="${role.name}">ROLE_USER</span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
+</p>
+<br/>
+<div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+    <a th:href="@{/admin}">Go to Admin Panel</a>
+</div>
+<br/>
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Logout</button>
+</form>
+</body>
+</html>
