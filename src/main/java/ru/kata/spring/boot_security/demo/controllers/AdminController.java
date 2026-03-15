@@ -14,21 +14,16 @@ import ru.kata.spring.boot_security.demo.service.UserService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
     private final UserService userService;
-    private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService; // теперь используем RoleService
 
     @Autowired
-    public AdminController(UserService userService,
-                           RoleService roleService,
-                           PasswordEncoder passwordEncoder) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -40,17 +35,14 @@ public class AdminController {
     @GetMapping("/new")
     public String newUserForm(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleService.findAll());
+        model.addAttribute("allRoles", roleService.findAllRoles()); // через сервис
         return "admin/user-form";
     }
 
     @PostMapping("/save")
     public String saveUser(@ModelAttribute User user,
                            @RequestParam("roles") List<Integer> roleIds) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        Set<Role> roles = new HashSet<>(roleService.findAllByIds(roleIds));
-        user.setRoles(roles);
-        userService.saveUser(user);
+        userService.createUser(user, roleIds); // вся логика внутри сервиса
         return "redirect:/admin";
     }
 
@@ -59,7 +51,7 @@ public class AdminController {
         User user = userService.findUserById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         model.addAttribute("user", user);
-        model.addAttribute("allRoles", roleService.findAll());
+        model.addAttribute("allRoles", roleService.findAllRoles()); // через сервис
         return "admin/user-form";
     }
 
@@ -67,17 +59,7 @@ public class AdminController {
     public String updateUser(@PathVariable Integer id,
                              @ModelAttribute User user,
                              @RequestParam("roles") List<Integer> roleIds) {
-        User existingUser = userService.findUserById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
-        existingUser.setName(user.getName());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setAge(user.getAge());
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-        Set<Role> roles = roleService.findAllByIds(roleIds);
-        existingUser.setRoles(roles);
-        userService.saveUser(existingUser);
+        userService.updateUser(id, user, roleIds); // вся логика внутри сервиса
         return "redirect:/admin";
     }
 

@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface UserService extends UserDetailsService {
 
     User saveUser(User user);
+    User createUser(User user, List<Integer> roleIds);
+    User updateUser(Integer id, User updatedUser, List<Integer> roleIds);
     Optional<User> findByEmail(String email);
     List<User> findAllUsers();
     Optional<User> findUserById(Integer id);
