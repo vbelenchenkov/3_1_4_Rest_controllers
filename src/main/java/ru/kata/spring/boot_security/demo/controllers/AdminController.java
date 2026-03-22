@@ -71,6 +71,7 @@ public class AdminController {
         return "redirect:/admin";
     }
 
+
     @PostMapping("/update")
     public String updateUserFromModal(@RequestParam Integer id,
                                       @RequestParam String firstName,
@@ -78,7 +79,7 @@ public class AdminController {
                                       @RequestParam Integer age,
                                       @RequestParam String email,
                                       @RequestParam(required = false) String password,
-                                      @RequestParam List<Integer> roles) {
+                                      @RequestParam(required = false) List<Integer> roles) {
         User user = userService.findUserById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         user.setFirstName(firstName);
@@ -88,8 +89,10 @@ public class AdminController {
         if (password != null && !password.isEmpty()) {
             user.setPassword(passwordEncoder.encode(password));
         }
-        Set<Role> roleSet = new HashSet<>(roleRepository.findAllById(roles));
-        user.setRoles(roleSet);
+        if (roles != null && !roles.isEmpty()) {
+            Set<Role> roleSet = new HashSet<>(roleRepository.findAllById(roles));
+            user.setRoles(roleSet);
+        }
         userService.saveUser(user);
         return "redirect:/admin";
     }
