@@ -97,8 +97,8 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    @PostMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Integer id) {
+    @PostMapping("/delete")
+    public String deleteUser(@RequestParam Integer id) {
         userService.deleteUser(id);
         return "redirect:/admin";
     }
