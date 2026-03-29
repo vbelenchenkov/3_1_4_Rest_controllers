@@ -94,7 +94,7 @@
         </div>
 
         <!-- Правая часть с таблицей -->
-        <div class="col-md-10 bg-white">
+        <div class="col-md-10 bg-light">
             <div class="container-fluid mt-4">
                 <div class="row">
                     <div class="col-12">
@@ -116,14 +116,14 @@
                         </div>
 
                         <!-- Белая область для таблицы -->
-                        <div class="bg-white pt-0 pb-3 px-3 rounded">
+                        <div class="bg-white pt-3 pb-4 px-3 rounded mb-0">
 
                             <!-- Блок "All users" -->
                             <div class="all-users-header">
                                 All users
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-striped">
+                                <table class="table table-striped mb-0">
                                     <thead>
                                     <tr>
                                         <th>ID</th>
@@ -145,7 +145,7 @@
                                         <td th:text="${user.email}">anna@example.com</td>
                                         <td>
                                                     <span th:each="role, iterStat : ${user.roles}">
-                                                        <span th:text="${role.name}">ROLE_USER</span>
+                                                        <span th:text="${role.displayName}">ROLE_USER</span>
                                                         <span th:if="${!iterStat.last}">, </span>
                                                     </span>
                                         </td>
@@ -191,39 +191,39 @@
                     <!-- ID (серый фон, только для чтения) -->
                     <div class="mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">ID</label>
-                        <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-33" id="editUserIdDisplay">—</div>
+                        <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-30" id="editUserIdDisplay">—</div>
                         <input type="hidden" name="id" id="editUserId">
                     </div>
                     <!-- First Name -->
                     <div class="mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">First Name</label>
-                        <input type="text" class="form-control text-start w-33" name="firstName" id="editFirstName" required>
+                        <input type="text" class="form-control text-start w-30" name="firstName" id="editFirstName" required>
                     </div>
                     <!-- Last Name -->
                     <div class="mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">Last Name</label>
-                        <input type="text" class="form-control text-start w-33" name="lastName" id="editLastName" required>
+                        <input type="text" class="form-control text-start w-30" name="lastName" id="editLastName" required>
                     </div>
                     <!-- Age -->
                     <div class="mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">Age</label>
-                        <input type="number" class="form-control text-start w-33" name="age" id="editAge" required>
+                        <input type="number" class="form-control text-start w-30" name="age" id="editAge" required>
                     </div>
                     <!-- Email -->
                     <div class="mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-control text-start w-33" name="email" id="editEmail" required>
+                        <input type="email" class="form-control text-start w-30" name="email" id="editEmail" required>
                     </div>
                     <!-- Password -->
                     <div class="mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">Password</label>
-                        <input type="password" class="form-control text-start w-33" name="password" placeholder="Leave blank to keep current">
+                        <input type="password" class="form-control text-start w-30" name="password" placeholder="Leave blank to keep current">
                     </div>
                     <!-- Role (мультиселект) -->
                     <div class="mb-3 d-flex flex-column align-items-center">
                         <label class="form-label">Role</label>
-                        <select class="form-select text-start w-33" name="roles" multiple size="2">
-                            <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+                        <select class="form-select text-start w-30" name="roles" multiple size="2">
+                            <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.displayName}"></option>
                         </select>
                         <div class="form-text text-center">Hold Ctrl (Cmd) to select multiple roles</div>
                     </div>
@@ -249,32 +249,32 @@
                 <!-- ID -->
                 <div class="mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">ID</label>
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-33" id="deleteUserIdDisplay"></div>
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-30" id="deleteUserIdDisplay"></div>
                 </div>
                 <!-- First Name -->
                 <div class="mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">First Name</label>
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-33" id="deleteUserFirstName"></div>
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-30" id="deleteUserFirstName"></div>
                 </div>
                 <!-- Last Name -->
                 <div class="mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">Last Name</label>
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-33" id="deleteUserLastName"></div>
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-30" id="deleteUserLastName"></div>
                 </div>
                 <!-- Age -->
                 <div class="mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">Age</label>
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-33" id="deleteUserAge"></div>
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-30" id="deleteUserAge"></div>
                 </div>
                 <!-- Email -->
                 <div class="mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">Email</label>
-                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-33" id="deleteUserEmail"></div>
+                    <div class="bg-secondary bg-opacity-10 p-2 rounded text-start w-30" id="deleteUserEmail"></div>
                 </div>
                 <!-- Roles (вертикальный список) -->
                 <div class="mb-3 d-flex flex-column align-items-center">
                     <label class="form-label">Roles</label>
-                    <ul class="list-unstyled bg-secondary bg-opacity-10 p-2 rounded text-start w-33 mb-0" id="deleteUserRolesList"></ul>
+                    <ul class="list-unstyled bg-secondary bg-opacity-10 p-2 rounded text-start w-30 mb-0" id="deleteUserRolesList"></ul>
                 </div>
             </div>
             <div class="modal-footer">
@@ -352,27 +352,6 @@
 </body>
 
 <style>
-
-    /* Стили для вкладок (оставляем те, что уже работают) */
-    .tabs-container .tab-link,
-    .tabs-container .tab-link.active,
-    .tabs-container .tab-link:not(.active) {
-        text-decoration: none !important;
-        background-color: #e9ecef !important;
-        color: #0d6efd !important;
-        transition: background-color 0.2s, color 0.2s;
-    }
-    .tabs-container .tab-link.active {
-        background-color: white !important;
-        color: #212529 !important;
-        border-bottom: 1px solid white !important;
-        margin-bottom: -1px;
-    }
-    .tabs-container .tab-link:not(.active):hover {
-        background-color: #dee2e6 !important;
-        color: #0a58ca !important;
-    }
-
     /* Строка "All users" */
     .all-users-header {
         background-color: #e9ecef;
@@ -380,6 +359,7 @@
         padding-left: 6mm;
         margin: 0;
         font-weight: 500;
+        font-size: 1.6rem;  /* увеличиваем текст в 1.6 раза относительно базового размера (обычно 1rem = 16px) */
         border-top: 1px solid #dee2e6;
         border-bottom: 1px solid #dee2e6;
     }
@@ -398,6 +378,10 @@
     .bg-white.p-3.rounded {
         width: 100%;
         box-sizing: border-box;
+    }
+    .w-30 {
+        width: 30% !important;
+        min-width: 200px; /* чтобы на маленьких экранах не сжималось */
     }
 </style>
 </html>

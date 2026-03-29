@@ -43,6 +43,9 @@ public class Role implements GrantedAuthority {
 
         return name;
     }
+    public String getDisplayName() {
+        return name.replace("ROLE_", "");
+    }
     @Override
     public boolean equals(Object o) {
 
