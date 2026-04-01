@@ -1,18 +1,13 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/admin")
@@ -20,14 +15,11 @@ public class AdminController {
 
     private final UserService userService;
     private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public AdminController(UserService userService,
-                           RoleRepository roleRepository,
-                           PasswordEncoder passwordEncoder) {
+                           RoleRepository roleRepository) {
         this.userService = userService;
         this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -47,10 +39,8 @@ public class AdminController {
     @PostMapping("/save")
     public String saveUser(@ModelAttribute User user,
                            @RequestParam("roles") List<Integer> roleIds) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
-        user.setRoles(roles);
-        userService.saveUser(user);
+
+        userService.createUser(user, roleIds);
         return "redirect:/admin";
     }
 
@@ -71,7 +61,6 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-
     @PostMapping("/update")
     public String updateUserFromModal(@RequestParam Integer id,
                                       @RequestParam String firstName,
@@ -80,20 +69,7 @@ public class AdminController {
                                       @RequestParam String email,
                                       @RequestParam(required = false) String password,
                                       @RequestParam(required = false) List<Integer> roles) {
-        User user = userService.findUserById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setAge(age);
-        user.setEmail(email);
-        if (password != null && !password.isEmpty()) {
-            user.setPassword(passwordEncoder.encode(password));
-        }
-        if (roles != null && !roles.isEmpty()) {
-            Set<Role> roleSet = new HashSet<>(roleRepository.findAllById(roles));
-            user.setRoles(roleSet);
-        }
-        userService.saveUser(user);
+        userService.updateUserFromModal(id, firstName, lastName, age, email, password, roles);
         return "redirect:/admin";
     }
 

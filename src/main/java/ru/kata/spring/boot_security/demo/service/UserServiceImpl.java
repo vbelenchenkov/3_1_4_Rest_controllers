@@ -32,21 +32,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
-
-    @Override
-    @Transactional
     public User createUser(User user, List<Integer> roleIds) {
-        System.out.println("=== Creating user ===");
-        System.out.println("firstName: " + user.getFirstName());
-        System.out.println("lastName: " + user.getLastName());
-        System.out.println("email: " + user.getEmail());
-        System.out.println("age: " + user.getAge());
-        System.out.println("password: " + (user.getPassword() != null ? "set" : "null"));
-        System.out.println("roleIds: " + roleIds);
-
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
         user.setRoles(roles);
@@ -67,6 +53,26 @@ public class UserServiceImpl implements UserService{
         }
         Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
         existingUser.setRoles(roles);
+        return userRepository.save(existingUser);
+    }
+
+    @Override
+    @Transactional
+    public User updateUserFromModal(Integer id, String firstName, String lastName, Integer age,
+                                    String email, String password, List<Integer> roleIds) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+        existingUser.setFirstName(firstName);
+        existingUser.setLastName(lastName);
+        existingUser.setAge(age);
+        existingUser.setEmail(email);
+        if (password != null && !password.isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(password));
+        }
+        if (roleIds != null && !roleIds.isEmpty()) {
+            Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
+            existingUser.setRoles(roles);
+        }
         return userRepository.save(existingUser);
     }
 
