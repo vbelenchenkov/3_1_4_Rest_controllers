@@ -51,24 +51,6 @@ public class UserServiceImpl implements UserService{
         if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
             existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
-        Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
-        existingUser.setRoles(roles);
-        return userRepository.save(existingUser);
-    }
-
-    @Override
-    @Transactional
-    public User updateUserFromModal(Integer id, String firstName, String lastName, Integer age,
-                                    String email, String password, List<Integer> roleIds) {
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
-        existingUser.setFirstName(firstName);
-        existingUser.setLastName(lastName);
-        existingUser.setAge(age);
-        existingUser.setEmail(email);
-        if (password != null && !password.isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(password));
-        }
         if (roleIds != null && !roleIds.isEmpty()) {
             Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
             existingUser.setRoles(roles);

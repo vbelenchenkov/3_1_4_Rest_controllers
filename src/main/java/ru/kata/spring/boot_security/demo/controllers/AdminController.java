@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.util.List;
@@ -14,32 +14,29 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
-    public AdminController(UserService userService,
-                           RoleRepository roleRepository) {
+    public AdminController(UserService userService, RoleService roleService) {
         this.userService = userService;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @GetMapping
     public String getUsersList(Model model) {
         model.addAttribute("users", userService.findAllUsers());
-        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("allRoles", roleService.findAllRoles());
         return "admin/users";
     }
 
     @GetMapping("/new")
     public String newUserForm(Model model) {
         model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("allRoles", roleService.findAllRoles());
         return "admin/user-form";
     }
 
     @PostMapping("/save")
-    public String saveUser(@ModelAttribute User user,
-                           @RequestParam("roles") List<Integer> roleIds) {
-
+    public String saveUser(@ModelAttribute User user, @RequestParam("roles") List<Integer> roleIds) {
         userService.createUser(user, roleIds);
         return "redirect:/admin";
     }
@@ -49,7 +46,7 @@ public class AdminController {
         User user = userService.findUserById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
         model.addAttribute("user", user);
-        model.addAttribute("allRoles", roleRepository.findAll());
+        model.addAttribute("allRoles", roleService.findAllRoles());
         return "admin/user-form";
     }
 
@@ -69,7 +66,13 @@ public class AdminController {
                                       @RequestParam String email,
                                       @RequestParam(required = false) String password,
                                       @RequestParam(required = false) List<Integer> roles) {
-        userService.updateUserFromModal(id, firstName, lastName, age, email, password, roles);
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setAge(age);
+        user.setEmail(email);
+        user.setPassword(password);
+        userService.updateUser(id, user, roles);
         return "redirect:/admin";
     }
 
