@@ -66,13 +66,8 @@ public class AdminController {
                                       @RequestParam String email,
                                       @RequestParam(required = false) String password,
                                       @RequestParam(required = false) List<Integer> roles) {
-        User user = new User();
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setAge(age);
-        user.setEmail(email);
-        user.setPassword(password);
-        userService.updateUser(id, user, roles);
+
+        userService.updateUserFromModal(id, firstName, lastName, age, email, password, roles);
         return "redirect:/admin";
     }
 
