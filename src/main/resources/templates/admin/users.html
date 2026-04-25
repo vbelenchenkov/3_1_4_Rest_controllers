@@ -102,9 +102,10 @@
                                    th:classappend="${#httpServletRequest.requestURI == '/admin' ? 'active' : ''}">
                                     Users table
                                 </a>
-                                <a th:href="@{/admin/new}"
+                                <a href="#"
                                    class="tab-link"
-                                   th:classappend="${#httpServletRequest.requestURI == '/admin/new' ? 'active' : ''}">
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#createUserModal">
                                     New User
                                 </a>
                             </div>
@@ -249,20 +250,32 @@
 
         let allRoles = [];
 
-        // Загрузка списка ролей
+        function fillCreateRolesSelect() {
+            const select = document.getElementById('createRoles');
+            if (!select) return;
+            select.innerHTML = '';
+            allRoles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = role.name ? role.name.replace('ROLE_', '') : (role.displayName || role.name);
+                select.appendChild(option);
+            });
+        }
+
         function loadRolesForModal() {
             return fetch('/api/admin/roles')
                 .then(response => response.json())
                 .then(roles => {
                     allRoles = roles;
-                    const select = document.getElementById('editRoles');
-                    select.innerHTML = '';
+                    const editSelect = document.getElementById('editRoles');
+                    editSelect.innerHTML = '';
                     roles.forEach(role => {
                         const option = document.createElement('option');
                         option.value = role.id;
                         option.textContent = role.name ? role.name.replace('ROLE_', '') : (role.displayName || role.name);
-                        select.appendChild(option);
+                        editSelect.appendChild(option);
                     });
+                    fillCreateRolesSelect();
                 })
                 .catch(error => console.error('Ошибка загрузки ролей:', error));
         }
@@ -289,8 +302,10 @@
                         row.insertCell().textContent = user.email;
                         const rolesCell = row.insertCell();
                         rolesCell.textContent = user.roles.map(r => r.name ? r.name.replace('ROLE_', '') : (r.displayName || r.name)).join(', ');
+
                         const editCell = row.insertCell();
                         const deleteCell = row.insertCell();
+
                         const editBtn = document.createElement('button');
                         editBtn.textContent = 'Edit';
                         editBtn.className = 'btn btn-sm btn-primary';
@@ -305,8 +320,8 @@
                             const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
                             modal.show();
                         });
-
                         editCell.appendChild(editBtn);
+
                         const deleteBtn = document.createElement('button');
                         deleteBtn.textContent = 'Delete';
                         deleteBtn.className = 'btn btn-sm btn-danger';
@@ -320,7 +335,7 @@
                                             alert('Ошибка при удалении');
                                         }
                                     })
-                                .catch(error => console.error('Ошибка:', error));
+                                    .catch(error => console.error('Ошибка:', error));
                             }
                         });
                         deleteCell.appendChild(deleteBtn);
@@ -350,13 +365,43 @@
                 .then(response => {
                     if (response.ok) {
                         bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
-                        loadUsers(); // обновляем таблицу
+                        loadUsers();
                     } else {
                         alert('Ошибка при обновлении');
                     }
                 })
                 .catch(error => console.error('Ошибка:', error));
         });
+
+        document.getElementById('saveCreateBtn').addEventListener('click', () => {
+            const newUser = {
+                firstName: document.getElementById('createFirstName').value,
+                lastName: document.getElementById('createLastName').value,
+                age: parseInt(document.getElementById('createAge').value),
+                email: document.getElementById('createEmail').value,
+                password: document.getElementById('createPassword').value
+            };
+            const selectedRoles = Array.from(document.getElementById('createRoles').selectedOptions)
+                .map(option => option.value)
+                .join(',');
+
+            fetch(`/api/admin/users?roleIds=${selectedRoles}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+                        document.getElementById('createUserForm').reset();
+                        loadUsers();
+                    } else {
+                        alert('Ошибка при создании пользователя');
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
+        });
+
         loadRolesForModal();
         loadUsers();
     });

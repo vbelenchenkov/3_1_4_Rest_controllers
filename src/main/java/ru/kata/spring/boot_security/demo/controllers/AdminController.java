@@ -28,26 +28,10 @@ public class AdminController {
         return "admin/users";
     }
 
-    @GetMapping("/new")
-    public String newUserForm(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleService.findAllRoles());
-        return "admin/user-form";
-    }
-
     @PostMapping("/save")
     public String saveUser(@ModelAttribute User user, @RequestParam("roles") List<Integer> roleIds) {
         userService.createUser(user, roleIds);
         return "redirect:/admin";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String editUserForm(@PathVariable Integer id, Model model) {
-        User user = userService.findUserById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
-        model.addAttribute("user", user);
-        model.addAttribute("allRoles", roleService.findAllRoles());
-        return "admin/user-form";
     }
 
     @PostMapping("/update/{id}")
