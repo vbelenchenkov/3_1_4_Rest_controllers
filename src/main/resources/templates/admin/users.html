@@ -129,39 +129,8 @@
                                         <th>Delete</th>
                                     </thead>
                                     </thead>
-                                    <tbody>
-                                    <tr th:each="user : ${users}">
-                                        <td th:text="${user.id}">1</td>
-                                        <td th:text="${user.firstName}">Anna</td>
-                                        <td th:text="${user.lastName}">Smith</td>
-                                        <td th:text="${user.age}">25</td>
-                                        <td th:text="${user.email}">anna@example.com</td>
-                                        <td>
-                                                    <span th:each="role, iterStat : ${user.roles}">
-                                                        <span th:text="${role.displayName}">ROLE_USER</span>
-                                                        <span th:if="${!iterStat.last}"> </span>
-                                                    </span>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-sm btn-primary"
-                                                    data-bs-toggle="modal" data-bs-target="#editUserModal"
-                                                    th:data-user-id="${user.id}"
-                                                    th:data-user-firstname="${user.firstName}"
-                                                    th:data-user-lastname="${user.lastName}"
-                                                    th:data-user-age="${user.age}"
-                                                    th:data-user-email="${user.email}">Edit</button>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-sm btn-danger"
-                                                    data-bs-toggle="modal" data-bs-target="#deleteUserModal"
-                                                    th:data-user-id="${user.id}"
-                                                    th:data-user-firstname="${user.firstName}"
-                                                    th:data-user-lastname="${user.lastName}"
-                                                    th:data-user-age="${user.age}"
-                                                    th:data-user-email="${user.email}"
-                                                    th:data-user-roles="${user.roleNames}">Delete</button>
-                                        </td>
-                                    </tr>
+                                    <tbody id="userTable">
+
                                     </tbody>
                                 </table>
                             </div>
@@ -268,68 +237,228 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    const editModal = document.getElementById('editUserModal');
-    if (editModal) {
-        editModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const userId = button.getAttribute('data-user-id');
-            const firstName = button.getAttribute('data-user-firstname');
-            const lastName = button.getAttribute('data-user-lastname');
-            const age = button.getAttribute('data-user-age');
-            const email = button.getAttribute('data-user-email');
+    document.addEventListener('DOMContentLoaded', function() {
+        const tbody = document.getElementById('userTable');
+        if (!tbody) {
+            console.error('Элемент userTable не найден');
+            return;
+        }
 
-            document.getElementById('editUserIdDisplay').textContent = userId;
-            document.getElementById('editUserId').value = userId;
-            document.getElementById('editFirstName').value = firstName;
-            document.getElementById('editLastName').value = lastName;
-            document.getElementById('editAge').value = age;
-            document.getElementById('editEmail').value = email;
-        });
-    }
+        let allRoles = [];
 
-    const deleteModal = document.getElementById('deleteUserModal');
-    if (deleteModal) {
-        deleteModal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const userId = button.getAttribute('data-user-id');
-            const firstName = button.getAttribute('data-user-firstname');
-            const lastName = button.getAttribute('data-user-lastname');
-            const age = button.getAttribute('data-user-age');
-            const email = button.getAttribute('data-user-email');
-            const rolesString = button.getAttribute('data-user-roles');
+        // Загрузка списка ролей
+        function loadRolesForModal() {
+            return fetch('/api/admin/roles')
+                .then(response => response.json())
+                .then(roles => {
+                    allRoles = roles;
+                    const select = document.getElementById('editRoles');
+                    select.innerHTML = '';
+                    roles.forEach(role => {
+                        const option = document.createElement('option');
+                        option.value = role.id;
+                        option.textContent = role.name ? role.name.replace('ROLE_', '') : (role.displayName || role.name);
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Ошибка загрузки ролей:', error));
+        }
 
-            document.getElementById('deleteUserId').value = userId;
-            document.getElementById('deleteUserIdDisplay').textContent = userId;
-            document.getElementById('deleteUserFirstName').textContent = firstName;
-            document.getElementById('deleteUserLastName').textContent = lastName;
-            document.getElementById('deleteUserAge').textContent = age;
-            document.getElementById('deleteUserEmail').textContent = email;
-
-            const rolesList = document.getElementById('deleteUserRolesList');
-            rolesList.innerHTML = '';
-            if (rolesString) {
-                const rolesArray = rolesString.split(',').map(r => r.trim()).filter(r => r);
-                rolesArray.forEach(role => {
-                    const li = document.createElement('li');
-                    li.textContent = role;
-                    li.classList.add('mb-1');
-                    rolesList.appendChild(li);
-                });
-            } else {
-                const li = document.createElement('li');
-                li.textContent = '—';
-                rolesList.appendChild(li);
+        function setSelectedRoles(userRoles) {
+            const select = document.getElementById('editRoles');
+            for (let i = 0; i < select.options.length; i++) {
+                const option = select.options[i];
+                option.selected = userRoles.some(r => r.id == option.value);
             }
+        }
+
+        function loadUsers() {
+            fetch('/api/admin/users')
+                .then(response => response.json())
+                .then(users => {
+                    tbody.innerHTML = '';
+                    users.forEach(user => {
+                        const row = tbody.insertRow();
+                        row.insertCell().textContent = user.id;
+                        row.insertCell().textContent = user.firstName;
+                        row.insertCell().textContent = user.lastName;
+                        row.insertCell().textContent = user.age;
+                        row.insertCell().textContent = user.email;
+                        const rolesCell = row.insertCell();
+                        rolesCell.textContent = user.roles.map(r => r.name ? r.name.replace('ROLE_', '') : (r.displayName || r.name)).join(', ');
+                        const editCell = row.insertCell();
+                        const deleteCell = row.insertCell();
+                        const editBtn = document.createElement('button');
+                        editBtn.textContent = 'Edit';
+                        editBtn.className = 'btn btn-sm btn-primary';
+                        editBtn.addEventListener('click', () => {
+                            document.getElementById('editUserId').value = user.id;
+                            document.getElementById('editFirstName').value = user.firstName;
+                            document.getElementById('editLastName').value = user.lastName;
+                            document.getElementById('editAge').value = user.age;
+                            document.getElementById('editEmail').value = user.email;
+                            document.getElementById('editPassword').value = '';
+                            setSelectedRoles(user.roles);
+                            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                            modal.show();
+                        });
+
+                        editCell.appendChild(editBtn);
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = 'Delete';
+                        deleteBtn.className = 'btn btn-sm btn-danger';
+                        deleteBtn.addEventListener('click', () => {
+                            if (confirm('Удалить пользователя ' + user.firstName + ' ' + user.lastName + '?')) {
+                                fetch(`/api/admin/users/${user.id}`, { method: 'DELETE' })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            row.remove();
+                                        } else {
+                                            alert('Ошибка при удалении');
+                                        }
+                                    })
+                                .catch(error => console.error('Ошибка:', error));
+                            }
+                        });
+                        deleteCell.appendChild(deleteBtn);
+                    });
+                })
+                .catch(error => console.error('Ошибка загрузки пользователей:', error));
+        }
+
+        document.getElementById('saveEditBtn').addEventListener('click', () => {
+            const id = document.getElementById('editUserId').value;
+            const updatedUser = {
+                firstName: document.getElementById('editFirstName').value,
+                lastName: document.getElementById('editLastName').value,
+                age: parseInt(document.getElementById('editAge').value),
+                email: document.getElementById('editEmail').value,
+                password: document.getElementById('editPassword').value
+            };
+            const selectedRoles = Array.from(document.getElementById('editRoles').selectedOptions)
+                .map(option => option.value)
+                .join(',');
+
+            fetch(`/api/admin/users/${id}?roleIds=${selectedRoles}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedUser)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                        loadUsers(); // обновляем таблицу
+                    } else {
+                        alert('Ошибка при обновлении');
+                    }
+                })
+                .catch(error => console.error('Ошибка:', error));
         });
-    }
+        loadRolesForModal();
+        loadUsers();
+    });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Редактирование пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label for="editFirstName" class="form-label">First name</label>
+                        <input type="text" class="form-control" id="editFirstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editLastName" class="form-label">Last name</label>
+                        <input type="text" class="form-control" id="editLastName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAge" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="editAge" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPassword" class="form-label">Password (оставьте пустым, чтобы не менять)</label>
+                        <input type="password" class="form-control" id="editPassword">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Roles</label>
+                        <select id="editRoles" class="form-select" multiple>
+                            <!-- роли будут загружены отдельно -->
+                        </select>
+                        <div class="form-text">Hold Ctrl (Cmd) to select multiple</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveEditBtn">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно создания пользователя -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">Добавление пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="mb-3">
+                        <label for="createFirstName" class="form-label">First name</label>
+                        <input type="text" class="form-control" id="createFirstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createLastName" class="form-label">Last name</label>
+                        <input type="text" class="form-control" id="createLastName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createAge" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="createAge" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="createEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="createPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="createPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Roles</label>
+                        <select id="createRoles" class="form-select" multiple>
+                            <!-- роли будут загружены из allRoles -->
+                        </select>
+                        <div class="form-text">Hold Ctrl (Cmd) to select multiple</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="saveCreateBtn">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 
 <style>
-
     .all-users-header {
         background-color: #e9ecef;
         padding: 0.5rem 1rem;
