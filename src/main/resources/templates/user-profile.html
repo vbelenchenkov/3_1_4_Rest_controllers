@@ -9,13 +9,10 @@
 
 <div class="container-fluid">
     <div class="row">
-
         <div class="col-md-2 bg-white vh-100 p-3">
             <ul class="nav flex-column">
                 <li sec:authorize="hasRole('ADMIN')" class="nav-item mb-2">
-                    <a th:href="@{/admin}" class="nav-link text-dark"
-                       th:classappend="${#httpServletRequest.requestURI.contains('/admin')} ?
-                       'active bg-primary text-white' : ''">Admin</a>
+                    <a th:href="@{/admin}" class="nav-link text-dark">Admin</a>
                 </li>
                 <li class="nav-item mb-2">
                     <a th:href="@{/user}" class="nav-link text-dark active bg-primary text-white">User</a>
@@ -23,20 +20,19 @@
             </ul>
         </div>
 
-        <div class="col-md-10 bg-light">
+        <div class="col-md-10 bg-white">
             <div class="container-fluid mt-4">
                 <div class="row">
                     <div class="col-12">
-                        <div class="bg-secondary bg-opacity-10 p-3 rounded mb-0">
+                        <div class="bg-light p-3 rounded mb-0">
                             <h1 class="mb-3">User information-page</h1>
                         </div>
-
-                        <div class="bg-white pt-3 pb-4 px-3 rounded">
+                        <div class="bg-white pt-3 pb-2 px-3 rounded">
                             <div class="all-users-header">
                                 About user
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-striped mb-0">
+                                <table class="table table-striped">
                                     <thead>
                                     <tr>
                                         <th>ID</th>
@@ -47,20 +43,8 @@
                                         <th>Roles</th>
                                     </thead>
                                     </thead>
-                                    <tbody>
-                                    <tr th:each="user : ${users}">
-                                        <td th:text="${user.id}">1</td>
-                                        <td th:text="${user.firstName}">John</td>
-                                        <td th:text="${user.lastName}">Doe</td>
-                                        <td th:text="${user.age}">30</td>
-                                        <td th:text="${user.email}">user@example.com</td>
-                                        <td>
-                                            <span th:each="role, iterStat : ${user.roles}">
-                                                <span th:text="${#strings.replace(role.name, 'ROLE_', '')}">USER</span>
-                                                <span th:if="${!iterStat.last}"> </span>
-                                            </span>
-                                        </td>
-                                    </tr>
+                                    <tbody id="userProfileTable">
+
                                     </tbody>
                                 </table>
                             </div>
@@ -71,5 +55,25 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/user/current')
+            .then(response => response.json())
+            .then(user => {
+                const tbody = document.getElementById('userProfileTable');
+                tbody.innerHTML = '';
+                const row = tbody.insertRow();
+                row.insertCell().textContent = user.id;
+                row.insertCell().textContent = user.firstName;
+                row.insertCell().textContent = user.lastName;
+                row.insertCell().textContent = user.age;
+                row.insertCell().textContent = user.email;
+                const rolesCell = row.insertCell();
+                rolesCell.textContent = user.roles.map(r => r.name ? r.name.replace('ROLE_', '') : (r.displayName || r.name)).join(', ');
+            })
+            .catch(error => console.error('Ошибка загрузки профиля:', error));
+    });
+</script>
 </body>
 </html>

@@ -111,8 +111,6 @@
                             </div>
                         </div>
                         <div class="bg-white pt-3 pb-4 px-3 rounded mb-0">
-
-
                             <div class="all-users-header">
                                 All users
                             </div>
@@ -131,7 +129,6 @@
                                     </thead>
                                     </thead>
                                     <tbody id="userTable">
-
                                     </tbody>
                                 </table>
                             </div>
@@ -239,7 +236,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tbody = document.getElementById('userTable');
@@ -247,9 +243,7 @@
             console.error('Элемент userTable не найден');
             return;
         }
-
         let allRoles = [];
-
         function fillCreateRolesSelect() {
             const select = document.getElementById('createRoles');
             if (!select) return;
@@ -261,7 +255,6 @@
                 select.appendChild(option);
             });
         }
-
         function loadRolesForModal() {
             return fetch('/api/admin/roles')
                 .then(response => response.json())
@@ -279,7 +272,6 @@
                 })
                 .catch(error => console.error('Ошибка загрузки ролей:', error));
         }
-
         function setSelectedRoles(userRoles) {
             const select = document.getElementById('editRoles');
             for (let i = 0; i < select.options.length; i++) {
@@ -287,7 +279,6 @@
                 option.selected = userRoles.some(r => r.id == option.value);
             }
         }
-
         function loadUsers() {
             fetch('/api/admin/users')
                 .then(response => response.json())
@@ -302,10 +293,8 @@
                         row.insertCell().textContent = user.email;
                         const rolesCell = row.insertCell();
                         rolesCell.textContent = user.roles.map(r => r.name ? r.name.replace('ROLE_', '') : (r.displayName || r.name)).join(', ');
-
                         const editCell = row.insertCell();
                         const deleteCell = row.insertCell();
-
                         const editBtn = document.createElement('button');
                         editBtn.textContent = 'Edit';
                         editBtn.className = 'btn btn-sm btn-primary';
@@ -321,7 +310,6 @@
                             modal.show();
                         });
                         editCell.appendChild(editBtn);
-
                         const deleteBtn = document.createElement('button');
                         deleteBtn.textContent = 'Delete';
                         deleteBtn.className = 'btn btn-sm btn-danger';
@@ -343,7 +331,6 @@
                 })
                 .catch(error => console.error('Ошибка загрузки пользователей:', error));
         }
-
         document.getElementById('saveEditBtn').addEventListener('click', () => {
             const id = document.getElementById('editUserId').value;
             const updatedUser = {
@@ -356,7 +343,6 @@
             const selectedRoles = Array.from(document.getElementById('editRoles').selectedOptions)
                 .map(option => option.value)
                 .join(',');
-
             fetch(`/api/admin/users/${id}?roleIds=${selectedRoles}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -372,7 +358,6 @@
                 })
                 .catch(error => console.error('Ошибка:', error));
         });
-
         document.getElementById('saveCreateBtn').addEventListener('click', () => {
             const newUser = {
                 firstName: document.getElementById('createFirstName').value,
@@ -401,12 +386,10 @@
                 })
                 .catch(error => console.error('Ошибка:', error));
         });
-
         loadRolesForModal();
         loadUsers();
     });
 </script>
-
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -454,7 +437,6 @@
     </div>
 </div>
 
-<!-- Модальное окно создания пользователя -->
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -500,7 +482,6 @@
         </div>
     </div>
 </div>
-
 </body>
 
 <style>
