@@ -15,59 +15,8 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final UserService userService;
-    private final RoleService roleService;
-
-    public AdminController(UserService userService, RoleService roleService) {
-        this.userService = userService;
-        this.roleService = roleService;
-    }
-
     @GetMapping
-    public String getUsersList(Model model) {
-        model.addAttribute("users", userService.findAllUsers());
-        model.addAttribute("allRoles", roleService.findAllRoles());
+    public String usersPage() {
         return "admin/users";
-    }
-
-    @PostMapping("/save")
-    public String saveUser(@ModelAttribute User user, @RequestParam("roles") List<Integer> roleIds) {
-        userService.createUser(user, roleIds);
-        return "redirect:/admin";
-    }
-
-    @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable Integer id,
-                             @ModelAttribute User user,
-                             @RequestParam("roles") List<Integer> roleIds) {
-        userService.updateUser(id, user, roleIds);
-        return "redirect:/admin";
-    }
-
-    @PostMapping("/update")
-    public String updateUserFromModal(@RequestParam Integer id,
-                                      @RequestParam String firstName,
-                                      @RequestParam String lastName,
-                                      @RequestParam Integer age,
-                                      @RequestParam String email,
-                                      @RequestParam(required = false) String password,
-                                      @RequestParam(required = false) List<Integer> roles) {
-
-        userService.updateUserFromModal(id, firstName, lastName, age, email, password, roles);
-        return "redirect:/admin";
-    }
-
-    @PostMapping("/delete")
-    public String deleteUser(@RequestParam Integer id) {
-        userService.deleteUser(id);
-        return "redirect:/admin";
-    }
-
-    @GetMapping("/current-user")
-    public User getCurrentUser(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        return userService.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found."));
     }
 }
