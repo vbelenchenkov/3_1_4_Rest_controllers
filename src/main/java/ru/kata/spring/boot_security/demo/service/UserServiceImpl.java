@@ -59,25 +59,6 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User updateUserFromModal(Integer id, String firstName, String lastName, Integer age,
-                                    String email, String password, List<Integer> roleIds) {
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user id: " + id));
-        existingUser.setFirstName(firstName);
-        existingUser.setLastName(lastName);
-        existingUser.setAge(age);
-        existingUser.setEmail(email);
-        if(password != null && !password.isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(password));
-        }
-        if(roleIds != null && !roleIds.isEmpty()) {
-            Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
-            existingUser.setRoles(roles);
-        }
-        return userRepository.save(existingUser);
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username)
